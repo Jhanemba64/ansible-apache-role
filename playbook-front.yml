@@ -1,0 +1,6 @@
+- name: Deploy Apache on localhost
+  hosts: localhost
+  connection: local
+  become: true
+  roles:
+    - demo_apache

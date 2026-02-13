@@ -1,0 +1,4 @@
+---
+# defaults file for demo_apache
+app_title: "Demo Apache - généré par Ansible"
+web_root: "/var/www/html"

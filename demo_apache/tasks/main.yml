@@ -1,0 +1,30 @@
+---
+# tasks file for demo_apache
+- name: Gather OS facts
+  ansible.builtin.setup:
+
+- name: Set apache package/service names (Debian/RedHat)
+  ansible.builtin.set_fact:
+    apache_package: "{{ 'apache2' if ansible_facts.os_family == 'Debian' else 'httpd' }}"
+    apache_service: "{{ 'apache2' if ansible_facts.os_family == 'Debian' else 'httpd' }}"
+
+- name: Install Apache
+  ansible.builtin.package:
+    name: "{{ apache_package }}"
+    state: present
+    update_cache: true
+
+- name: Ensure Apache is started and enabled
+  ansible.builtin.service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: true
+
+- name: Deploy index.html from template
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_root }}/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart apache
