@@ -1,0 +1,54 @@
+# Intégration continue : lint du rôle, puis exécution réelle sur le runner
+# avec contrôle d'idempotence et de la page servie.
+# Les actions sont épinglées par SHA de commit (Dependabot les met à jour).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: ansible-lint
+        uses: ansible/ansible-lint@9bce2bfb8f4a984e6b13767bc0d6bf0a49492164 # v26.10.1
+
+  test:
+    name: Exécution du rôle (idempotence et page servie)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Installation d'Ansible
+        run: pipx install --force ansible-core==2.21.5
+
+      - name: Premier passage
+        run: ansible-playbook -i "localhost," -c local playbook-front.yml
+
+      # Un rôle idempotent ne modifie plus rien au second passage
+      - name: Second passage (idempotence)
+        run: |
+          ansible-playbook -i "localhost," -c local playbook-front.yml | tee second-passage.log
+          grep -qE 'changed=0 +unreachable=0 +failed=0' second-passage.log
+
+      - name: Apache sert la page générée
+        run: curl -fsS http://localhost/ | grep -q "Demo Apache"

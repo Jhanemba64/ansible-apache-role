@@ -1,5 +1,7 @@
 ---
-- hosts: localhost
-  remote_user: root
+- name: Test du rôle demo_apache
+  hosts: localhost
+  connection: local
+  become: true
   roles:
     - demo_apache

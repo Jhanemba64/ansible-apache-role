@@ -1,38 +1,32 @@
-Role Name
-=========
+# Rôle `demo_apache`
 
-A brief description of the role goes here.
+Installe Apache, le démarre et l'active au boot, puis publie une page d'accueil générée
+depuis un template Jinja2.
 
-Requirements
-------------
+## Plateformes
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Famille Debian (`apache2`), testée en CI sur Ubuntu 24.04. Les noms de paquet et de service
+de la famille RedHat (`httpd`) sont aussi pris en charge.
 
-Role Variables
---------------
+## Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+| Variable | Défaut | Usage |
+|---|---|---|
+| `app_title` | `Demo Apache - généré par Ansible` | Titre de la page d'accueil |
+| `web_root` | `/var/www/html` | Dossier publié par Apache |
 
-Dependencies
-------------
+## Exemple
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+```yaml
+- name: Serveurs web
+  hosts: web
+  become: true
+  roles:
+    - role: demo_apache
+      vars:
+        app_title: Mon site
+```
 
-Example Playbook
-----------------
+## Licence
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT
